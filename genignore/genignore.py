@@ -12,11 +12,11 @@ GENIGNORE_CACHE = ".genignore_cache"
 LATEST_ZIP = "latest.zip"
 
 
-def parse():
+def parse(args):
     parser = argparse.ArgumentParser(description="Generates .gitignore files")
     parser.add_argument('names', metavar='N', type=str, nargs='+',
                         help='Name(s) of things to include to the .gitignore')
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 def get_cache_paths():
@@ -61,12 +61,13 @@ def make_gitignore(templates_for_merging):
                 tmpl_separator = "".join([os.linesep, "# ", "</genignore ", name, ">", os.linesep])
                 file_content.append(tmpl_separator)
 
-
-    with open(".gitignore_example", 'w') as f:
+    cwd = os.getcwd()
+    gitignore_path = path.join(cwd,".gitignore")
+    with open(gitignore_path, 'w') as f:
         f.write(os.linesep.join(file_content))
 
-def main():
-    args = parse()
+def main(arguments):
+    args = parse(arguments)
     given_names = [n.lower().strip() for n in args.names]
 
     templates, names = init_repo_templates()
@@ -85,8 +86,8 @@ def main():
     return 0
 
 
-main_func = lambda : exit(main())
+main_func = lambda args: exit(main(args))
 
 
 if __name__ == '__main__':
-    main_func()
+    main_func(sys.argv[1:])
