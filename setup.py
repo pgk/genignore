@@ -2,18 +2,20 @@ from setuptools import setup, find_packages
 
 setup(
     name = "genignore",
-    version = "0.2.1",
+    version = "0.2.2",
     url="https://pypi.python.org/pypi/genignore",
     packages = find_packages(),
     author="Panos Kountanis",
     author_email="panosktn@gmail.com",
-    short_description="Generate gitignore files based on templates provided by github",
+    description="Generate gitignore files based on templates provided by github",
     long_description="""\
 =========
 genignore
 =========
 
-Generate gitignore files based on templates provided by github
+Command line tool that generates .gitignore files based on templates provided by github
+
+Install the latest with `pip install --upgrade genignore`
 
     """,
     entry_points = {
