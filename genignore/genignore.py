@@ -35,39 +35,14 @@ def get_cache_paths():
     return folder, LATEST_ZIP
 
 
-def init_repo_templates(sync=None):
+def get_latest_file():
+    folder, filename = get_cache_paths()
+    return path.join(folder, filename)
 
-    def update_latest_from_github(latest_file):
-        puts("Fetching latest templates from %s" % MASTER_ARCHIVE)
-        response = requests.get(MASTER_ARCHIVE, stream=True)
-        total_length = response.headers.get('content-length')
 
-        with open(latest_file, "wb") as f:
-            if total_length:
-                dl = 0
-                with progress.Bar(label="downloading ", expected_size=int(total_length)) as bar:
-                    for chunk in response.iter_content(1024):
-                        f.write(chunk)
-                        dl += len(chunk)
-                        bar.show(dl)
-            else:
-               f.write(response.content)
-
-        puts("Done!")
-
+def get_templates_from_zipfile(latest_file):
 
     templates = dict()
-
-    folder, filename = get_cache_paths()
-    latest_file = path.join(folder, filename)
-    dir_exists = path.isdir(folder)
-
-    if not dir_exists:
-        puts("github template folder not found. Creating folder at %s" % folder)
-        os.makedirs(folder)
-
-    if not dir_exists or sync:
-        update_latest_from_github(latest_file)
 
     with ZipFile(latest_file, 'r') as latest:
         for zi in latest.infolist():
@@ -78,12 +53,52 @@ def init_repo_templates(sync=None):
     return templates
 
 
+def update_latest_from_github(latest_file):
+
+    puts("Fetching latest templates from %s" % MASTER_ARCHIVE)
+
+    response = requests.get(MASTER_ARCHIVE, stream=True)
+    total_length = response.headers.get('content-length')
+
+    with open(latest_file, "wb") as f:
+        if total_length:
+            dl = 0
+            with progress.Bar(label="downloading ", expected_size=int(total_length)) as bar:
+                for chunk in response.iter_content(1024):
+                    f.write(chunk)
+                    dl += len(chunk)
+                    bar.show(dl)
+        else:
+           f.write(response.content)
+
+    puts("Done!")
+
+
+def init_repo_templates(sync=None):
+
+    folder, filename = get_cache_paths()
+    latest_file = get_latest_file()
+    dir_exists = path.isdir(folder)
+    file_missing = not os.path.isfile(latest_file)
+
+    if not dir_exists:
+        puts("github template folder not found. Creating folder at %s" % folder)
+        os.makedirs(folder)
+
+    if not dir_exists or file_missing or sync:
+        update_latest_from_github(latest_file)
+
+    return get_templates_from_zipfile(latest_file)
+
+
+def make_separator(name, end=''):
+    parts = [os.linesep, "# ", "<", end, "genignore ", name, ">", os.linesep]
+    return "".join(parts)
+
+
 def build_gitignore(templates_for_merging, out=None):
-    update = False
+
     puts("building .gitignore for (%s)" % ", ".join(templates_for_merging.keys()))
-    def make_separator(name, end=''):
-        parts = [os.linesep, "# ", "<", end, "genignore ", name, ">", os.linesep]
-        return "".join(parts)
 
     file_content = []
     fname = path.join(*get_cache_paths())
