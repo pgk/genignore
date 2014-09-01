@@ -5,6 +5,8 @@ import argparse
 import requests
 from zipfile import ZipFile
 
+from clint.textui import puts, progress
+
 
 MASTER_ARCHIVE = "https://github.com/github/gitignore/archive/master.zip"
 GENIGNORE_CACHE = ".genignore_cache"
@@ -15,9 +17,16 @@ def parse(args):
     parser = argparse.ArgumentParser(description="Generates .gitignore files")
     parser.add_argument('names', metavar='N', type=str, nargs='+',
                         help='Name(s) of things to include to the .gitignore')
+
     parser.add_argument("-o", "--out", type=str,
                         default='',
-                        help='where to output the generated gitignore')
+                        help='file to output the generated gitignore (default .gitignore of pwd)')
+
+    parser.add_argument("--sync", action='store_true',
+                        help='sync to latest templates (requires internet connection)')
+
+    parser.add_argument("--update", action='store_true',
+                        help='update the file if it exists, keeping custom entries')
     return parser.parse_args(args)
 
 
@@ -26,18 +35,39 @@ def get_cache_paths():
     return folder, LATEST_ZIP
 
 
-def init_repo_templates():
-    templates = None
+def init_repo_templates(sync=None):
+
+    def update_latest_from_github(latest_file):
+        puts("Fetching latest templates from %s" % MASTER_ARCHIVE)
+        response = requests.get(MASTER_ARCHIVE, stream=True)
+        total_length = response.headers.get('content-length')
+
+        with open(latest_file, "wb") as f:
+            if total_length:
+                dl = 0
+                with progress.Bar(label="downloading ", expected_size=int(total_length)) as bar:
+                    for chunk in response.iter_content(1024):
+                        f.write(chunk)
+                        dl += len(chunk)
+                        bar.show(dl)
+            else:
+               f.write(response.content)
+
+        puts("Done!")
+
+
     templates = dict()
 
     folder, filename = get_cache_paths()
     latest_file = path.join(folder, filename)
-    if not path.isdir(folder):
+    dir_exists = path.isdir(folder)
+
+    if not dir_exists:
+        puts("github template folder not found. Creating folder at %s" % folder)
         os.makedirs(folder)
-        r = requests.get(MASTER_ARCHIVE, stream=True)
-        with open(latest_file, "wb") as f:
-            for chunk in r.iter_content(1024):
-                f.write(chunk)
+
+    if not dir_exists or sync:
+        update_latest_from_github(latest_file)
 
     with ZipFile(latest_file, 'r') as latest:
         for zi in latest.infolist():
@@ -49,7 +79,8 @@ def init_repo_templates():
 
 
 def build_gitignore(templates_for_merging, out=None):
-
+    update = False
+    puts("building .gitignore for (%s)" % ", ".join(templates_for_merging.keys()))
     def make_separator(name, end=''):
         parts = [os.linesep, "# ", "<", end, "genignore ", name, ">", os.linesep]
         return "".join(parts)
@@ -70,15 +101,33 @@ def build_gitignore(templates_for_merging, out=None):
     else:
         gitignore_path = path.realpath(out)
 
+    if os.path.isfile(gitignore_path):
+        puts("file %s exists. Updating..." % gitignore_path)
+        with open(gitignore_path) as f:
+
+            pushlines = True
+            for line in f:
+                if "# <genignore " in line:
+                    pushlines = False
+                elif "# </genignore" in line:
+                    pushlines = True
+                else:
+                    stripped_line = line.strip()
+                    if pushlines and len(stripped_line):
+                        file_content.append(stripped_line)
+
+    file_content.append(os.linesep)
     with open(gitignore_path, 'w') as f:
         f.write(os.linesep.join(file_content))
+        puts("Done writing .gitignore templates on file %s" % gitignore_path)
 
 
 def main(arguments):
     args = parse(arguments)
+
     given_names = [n.lower().strip() for n in args.names]
 
-    templates = init_repo_templates()
+    templates = init_repo_templates(args.sync)
     names = templates.keys()
 
     selected = dict()
@@ -86,8 +135,8 @@ def main(arguments):
         if n in names:
             selected[n] = templates[n]
         else:
-            print("No .gitignore template available for %s" % n)
-            print("aborting")
+            puts("No .gitignore template available for %s" % n)
+            puts("aborting")
             return 1
 
     build_gitignore(selected, out=args.out)
