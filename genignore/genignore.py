@@ -15,18 +15,25 @@ LATEST_ZIP = "latest.zip"
 
 def parse(args):
     parser = argparse.ArgumentParser(description="Generates .gitignore files")
-    parser.add_argument('names', metavar='N', type=str, nargs='+',
-                        help='Name(s) of things to include to the .gitignore')
+    subparsers = parser.add_subparsers(title='subcommands',
+                                       help='valid genignore subcommands',
+                                       dest="action")
 
-    parser.add_argument("-o", "--out", type=str,
-                        default='',
-                        help='file to output the generated gitignore (default .gitignore of pwd)')
+    gen_parser = subparsers.add_parser('gen', help='generate a gitignore')
 
-    parser.add_argument("--sync", action='store_true',
-                        help='sync to latest templates (requires internet connection)')
 
-    parser.add_argument("--update", action='store_true',
-                        help='update the file if it exists, keeping custom entries')
+    gen_parser.add_argument('names', metavar='N', type=str, nargs='+',
+                            help='Name(s) of things to include to the .gitignore')
+
+    gen_parser.add_argument("-o", "--out", type=str, default='',
+                            help='file to output the generated gitignore (default .gitignore of pwd)')
+
+    gen_parser.add_argument("--update", action='store_true',
+                            help='update the file if it exists, keeping custom entries')
+
+
+    sync_parser = subparsers.add_parser("sync", help='sync to latest templates (requires internet connection)')
+
     return parser.parse_args(args)
 
 
@@ -139,22 +146,24 @@ def build_gitignore(templates_for_merging, out=None):
 
 def main(arguments):
     args = parse(arguments)
+    if args.action == "gen":
+        given_names = [n.lower().strip() for n in args.names]
 
-    given_names = [n.lower().strip() for n in args.names]
+        templates = init_repo_templates()
+        names = templates.keys()
 
-    templates = init_repo_templates(args.sync)
-    names = templates.keys()
+        selected = dict()
+        for n in given_names:
+            if n in names:
+                selected[n] = templates[n]
+            else:
+                puts("No .gitignore template available for %s" % n)
+                puts("aborting")
+                return 1
 
-    selected = dict()
-    for n in given_names:
-        if n in names:
-            selected[n] = templates[n]
-        else:
-            puts("No .gitignore template available for %s" % n)
-            puts("aborting")
-            return 1
-
-    build_gitignore(selected, out=args.out)
+        build_gitignore(selected, out=args.out)
+    elif args.action == "sync":
+        init_repo_templates(sync=True)
 
     return 0
 
