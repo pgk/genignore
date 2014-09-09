@@ -33,3 +33,9 @@ Bugs/Features
 =============
 
 Feel free to open a github issue `here <https://github.com/pgk/genignore/issues>`_.
+
+
+Contributors
+============
+
+* `svisser <https://github.com/svisser>`_.

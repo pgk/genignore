@@ -20,13 +20,13 @@ def delete_cache():
 class TestGenignoreParse(unittest.TestCase):
 
 	def test_assigns_names(self):
-		args = parse(["osx", "python", "linux"])
+		args = parse(["gen", "osx", "python", "linux"])
 		self.assertIsNotNone(args.names)
 
 	def test_assigns_optionals_if_present(self):
-		args = parse(["osx", "python", "linux", "--sync", "--update"])
+		args = parse(["gen", "osx", "python", "linux", "--update"])
 		self.assertTrue(args.update)
-		self.assertTrue(args.sync)
+		self.assertEquals(args.action, "gen")
 
 
 class TestGenignore_init_repo_templates(unittest.TestCase):
@@ -39,6 +39,12 @@ class TestGenignore_init_repo_templates(unittest.TestCase):
 		self.assertTrue(mocked_requests_get.called)
 		self.assertTrue(mocked_zip.called)
 
+	@mock.patch('requests.get')
+	@mock.patch('genignore.genignore.get_templates_from_zipfile')
+	def test_sync_if_folder_exists_but_sync_is_True(self, mocked_requests_get, mocked_zip):
+		init_repo_templates(sync=True)
+		self.assertTrue(mocked_requests_get.called)
+		self.assertTrue(mocked_zip.called)
 
 
 if __name__ == '__main__':
