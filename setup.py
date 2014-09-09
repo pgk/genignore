@@ -3,7 +3,8 @@ from setuptools import setup, find_packages
 
 
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    with open(os.path.join(os.path.dirname(__file__), fname)) as file_handle:
+        return file_handle.read()
 
 
 setup(
