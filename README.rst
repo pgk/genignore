@@ -26,6 +26,7 @@ Usage
 * To sync the templates with github, use ``genignore sync``
 * To generate a .gitignore for python, osx and linux, use ``genignore gen python osx linux``
 * To generate a .gitignore for python, osx and linux and save it as ``.foo``, use ``genignore gen python osx linux --out=.foo``
+* To list available templates, run ``genignore list``
 * Get help with ``genignore --help``
 
   
