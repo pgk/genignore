@@ -17,7 +17,8 @@ TTY_COLUMN_SIZE = 80
 
 
 def print_colored(txt, color):
-    puts(color(txt))
+    if sys.stdout.isatty():
+        puts(color(txt))
 
 
 print_error = lambda txt: print_colored(txt, colored.red)
@@ -132,7 +133,7 @@ def build_gitignore(templates_for_merging, out=None):
                 file_content.append(tmp.read())
                 file_content.append(make_separator(name, "/"))
 
-    if len(out) == 0:
+    if out is sys.stdout or len(out) == 0:
         cwd = os.getcwd()
         gitignore_path = path.join(cwd, ".gitignore")
     else:
@@ -154,9 +155,13 @@ def build_gitignore(templates_for_merging, out=None):
                         file_content.append(stripped_line)
 
     file_content.append(os.linesep)
-    with open(gitignore_path, 'w') as f:
-        f.write(os.linesep.join(file_content))
-        print_success("Done writing .gitignore templates on file %s" % gitignore_path)
+    gitignore = os.linesep.join(file_content)
+    if out is sys.stdout:
+        out.write(gitignore)
+    else:
+        with open(gitignore_path, 'w') as f:
+            f.write(gitignore)
+            print_success("Done writing .gitignore templates on file %s" % gitignore_path)
 
 
 def list_templates(names):
@@ -184,7 +189,11 @@ def main(arguments):
 
                 return 1
 
-        build_gitignore(selected, out=args.out)
+        if sys.stdout.isatty():
+            out = args.out
+        else:
+            out = sys.stdout
+        build_gitignore(selected, out=out)
 
     elif action == "sync":
         init_repo_templates(sync=True)
