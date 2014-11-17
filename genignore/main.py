@@ -1,55 +1,24 @@
+from __future__ import absolute_import, print_function
 import sys
 import os
 from os import path
-import argparse
-import requests
 from zipfile import ZipFile
 
-from clint.textui import puts, progress
-from clint.textui import columns, colored
+from clint.textui import progress
+from .helpers import print_colored
+from .helpers import print_error
+from .helpers import print_notice
+from .helpers import print_success
+from .helpers import isatty
+from .helpers import print_list
+
+from .cli import parse
+from . import updaters
 
 
 MASTER_ARCHIVE = "https://github.com/github/gitignore/archive/master.zip"
 GENIGNORE_CACHE = ".genignore_cache"
 LATEST_ZIP = "latest.zip"
-
-TTY_COLUMN_SIZE = 80
-
-
-def print_colored(txt, color):
-    if sys.stdout.isatty():
-        puts(color(txt))
-
-
-print_error = lambda txt: print_colored(txt, colored.red)
-print_notice = lambda txt: print_colored(txt, colored.yellow)
-print_success = lambda txt: print_colored(txt, colored.green)
-
-
-def parse(args):
-    parser = argparse.ArgumentParser(description="Generates .gitignore files")
-    subparsers = parser.add_subparsers(title='subcommands',
-                                       help='valid genignore subcommands',
-                                       dest="action")
-
-    gen_parser = subparsers.add_parser('gen', help='generate a gitignore')
-
-
-    gen_parser.add_argument('names', metavar='N', type=str, nargs='+',
-                            help='Name(s) of things to include to the .gitignore')
-
-    gen_parser.add_argument("-o", "--out", type=str, default='',
-                            help='file to output the generated gitignore (default .gitignore of pwd)')
-
-    gen_parser.add_argument("--update", action='store_true',
-                            help='update the file if it exists, keeping custom entries')
-
-
-    sync_parser = subparsers.add_parser("sync", help='sync to latest templates (requires internet connection)')
-
-    list_parser = subparsers.add_parser("list", help="list all available templates")
-
-    return parser.parse_args(args)
 
 
 def get_cache_paths():
@@ -75,23 +44,16 @@ def get_templates_from_zipfile(latest_file):
     return templates
 
 
-def update_latest_from_github(latest_file):
+def update_latest_from_github(archive_uri, latest_file):
 
-    print_notice("Fetching latest templates from %s" % MASTER_ARCHIVE)
+    print_notice("Fetching latest template(s) from %s" % archive_uri)
+    downloader = updaters.get('github')(archive_uri, latest_file)
+    total_length = next(downloader)
 
-    response = requests.get(MASTER_ARCHIVE, stream=True)
-    total_length = response.headers.get('content-length')
-
-    with open(latest_file, "wb") as f:
-        if total_length:
-            dl = 0
-            with progress.Bar(label="Downloading ", expected_size=int(total_length)) as bar:
-                for chunk in response.iter_content(1024):
-                    f.write(chunk)
-                    dl += len(chunk)
-                    bar.show(dl)
-        else:
-           f.write(response.content)
+    if total_length:
+        with progress.Bar(label="Downloading ", expected_size=int(total_length)) as bar:
+            for downloaded in downloader:
+                bar.show(downloaded)
 
     print_success("Done!")
 
@@ -109,7 +71,7 @@ def init_repo_templates(sync=None):
         os.makedirs(folder)
 
     if file_missing or sync:
-        update_latest_from_github(latest_file)
+        update_latest_from_github(MASTER_ARCHIVE, latest_file)
 
     return get_templates_from_zipfile(latest_file)
 
@@ -164,11 +126,6 @@ def build_gitignore(templates_for_merging, out=None):
             print_success("Done writing .gitignore templates on file %s" % gitignore_path)
 
 
-def list_templates(names):
-    print_notice('Available Templates:')
-    puts(columns([", ".join(names), TTY_COLUMN_SIZE]))
-
-
 def main(arguments):
     args = parse(arguments)
     action = args.action
@@ -189,7 +146,7 @@ def main(arguments):
 
                 return 1
 
-        if sys.stdout.isatty():
+        if isatty():
             out = args.out
         else:
             out = sys.stdout
@@ -201,7 +158,7 @@ def main(arguments):
     elif action == "list":
         templates = init_repo_templates()
         names = templates.keys()
-        list_templates(names)
+        print_list(names, title='Available Templates:')
 
     return 0
 

@@ -1,0 +1,25 @@
+import requests
+
+
+def get(updater_name):
+    return github
+
+
+MASTER_ARCHIVE = "https://github.com/github/gitignore/archive/master.zip"
+
+
+def github(latest_file):
+    response = requests.get(MASTER_ARCHIVE, stream=True)
+    total_length = response.headers.get('content-length')
+
+    yield total_length
+
+    with open(latest_file, "wb") as f:
+        if total_length:
+            downloaded = 0
+            for chunk in response.iter_content(1024):
+                f.write(chunk)
+                downloaded += len(chunk)
+                yield downloaded
+        else:
+           f.write(response.content)
