@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name = "genignore",
-    version = "0.4.0",
+    version = "0.5.0",
     url="https://pypi.python.org/pypi/genignore",
     packages = find_packages(),
     author="Panos Kountanis",
@@ -18,7 +18,7 @@ setup(
     long_description=read("README.rst"),
     entry_points = {
         'console_scripts': [
-            'genignore = genignore.genignore:main_func'
+            'genignore = genignore.main:main_func'
         ]
     },
     install_requires = [

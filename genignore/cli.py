@@ -19,6 +19,8 @@ def parse(args):
     gen_parser.add_argument("--update", action='store_true',
                             help='update the file if it exists, keeping custom entries')
 
+    gen_parser.add_argument("--add", action='store_true', default=False,
+                            help='add templates the file if it exists, keeping previous entries')
 
     sync_parser = subparsers.add_parser("sync", help='sync to latest templates (requires internet connection)')
 

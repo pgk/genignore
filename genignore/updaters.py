@@ -8,8 +8,8 @@ def get(updater_name):
 MASTER_ARCHIVE = "https://github.com/github/gitignore/archive/master.zip"
 
 
-def github(latest_file):
-    response = requests.get(MASTER_ARCHIVE, stream=True)
+def github(archive_url, latest_file):
+    response = requests.get(archive_url, stream=True)
     total_length = response.headers.get('content-length')
 
     yield total_length
