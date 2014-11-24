@@ -169,22 +169,29 @@ def build_gitignore(resolver, templates_for_merging, out=None, add_to_existing=F
                     templates_for_merging[t] = original_templates[t]
                 else:
                     print_notice("Warning: template %s not found. Skipping..." % t)
+        else:
+            print_notice("Warning: will not add to existing file. Use --add to add these...")
+            for e in existing_templates:
+                del templates_for_merging[e]
 
-    print_notice("building .gitignore for (%s)" % ", ".join(templates_for_merging.keys()))
+    if len(templates_for_merging):
+        print_notice("building .gitignore for (%s)" % ", ".join(templates_for_merging.keys()))
 
-    with ZipFile(fname, 'r') as zipfile:
-        for name, template in templates_for_merging.iteritems():
-            with zipfile.open(template, 'rU') as tmp:
-                file_content.append(make_separator(name))
-                file_content.append(tmp.read())
-                file_content.append(make_separator(name, "/"))
+        with ZipFile(fname, 'r') as zipfile:
+            for name, template in templates_for_merging.iteritems():
+                with zipfile.open(template, 'rU') as tmp:
+                    file_content.append(make_separator(name))
+                    file_content.append(tmp.read())
+                    file_content.append(make_separator(name, "/"))
 
-    file_content.append(os.linesep)
-    gitignore = os.linesep.join(file_content)
-    if out is sys.stdout:
-        out.write(gitignore)
+        file_content.append(os.linesep)
+        gitignore = os.linesep.join(file_content)
+        if out is sys.stdout:
+            out.write(gitignore)
+        else:
+            with open(gitignore_path, 'w') as f:
+                f.write(gitignore)
+                print_success("Done writing .gitignore templates on file %s" % gitignore_path)
     else:
-        with open(gitignore_path, 'w') as f:
-            f.write(gitignore)
-            print_success("Done writing .gitignore templates on file %s" % gitignore_path)
+        print_notice("no templates remaining after filtering. Exiting")
 
