@@ -8,13 +8,14 @@ from .cli import parse
 from .core import GenController
 
 
+splash_screen = """\
+genignore v1.0.1
+----------------"""
+
 
 def main(arguments):
     if isatty():
-        splash = """\
-genignore v1.0.1
-----------------"""
-        print_notice(splash)
+        print_notice(splash_screen)
     controller = GenController()
     controller(parse(arguments))
 

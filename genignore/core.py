@@ -44,7 +44,6 @@ class _CacheResolver(object):
 
         return templates
 
-
     def init_repo_templates(self, sync=None):
 
         folder, filename = self.get_cache_paths()
@@ -106,7 +105,7 @@ class GenController(object):
 
 def update_latest_from_github(archive_uri, latest_file):
 
-    print_notice("Fetching latest template(s) from %s" % archive_uri)
+    print_notice("Fetching latest template(s) from %s to %s" % (archive_uri, latest_file))
     downloader = updaters.get('github')(archive_uri, latest_file)
     total_length = next(downloader)
 
@@ -172,7 +171,8 @@ def build_gitignore(resolver, templates_for_merging, out=None, add_to_existing=F
         else:
             print_notice("Warning: will not add to existing file. Use --add to add these...")
             for e in existing_templates:
-                del templates_for_merging[e]
+                if e in templates_for_merging:
+                    del templates_for_merging[e]
 
     if len(templates_for_merging):
         print_notice("building .gitignore for (%s)" % ", ".join(templates_for_merging.keys()))
