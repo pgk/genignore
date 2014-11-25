@@ -1,4 +1,8 @@
 
+.venv
+test_ignore
+
+
 # <genignore python>
 
 # Byte-compiled / optimized / DLL files
@@ -67,7 +71,8 @@ target/
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
