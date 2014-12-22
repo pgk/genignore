@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+import six
 import sys
 import os
 from os import path
@@ -89,19 +90,23 @@ class GenController(object):
             out = sys.stdout
         build_gitignore(self.resolver, selected, out=out,
                         add_to_existing=args.add, original_templates=templates)
+        return 0
 
     def sync(self, args):
         self.resolver.init_repo_templates(sync=True)
+        return 0
 
     def list(self, args):
         templates = self.resolver.init_repo_templates()
         print_list(templates.keys(), title='Available Templates:')
+        return 0
 
     def __call__(self, args):
         action = args.action
         if hasattr(self, action):
-            getattr(self, action)(args)
-
+            return getattr(self, action)(args)
+        else:
+            raise NotImplementedError()
 
 def update_latest_from_github(archive_uri, latest_file):
 
