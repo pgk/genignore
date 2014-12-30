@@ -26,4 +26,11 @@ def parse(args):
 
     list_parser = subparsers.add_parser("list", help="list all available templates")
 
+    sources_parser = subparsers.add_parser("sources")
+
+    sources_subparsers = sources_parser.add_subparsers(title='sources subcommands',
+                                                       help='valid sources subcommands',
+                                                       dest="sub_action")
+    sources_list_parser = sources_subparsers.add_parser("list", help="list all available sources")
+
     return parser.parse_args(args)

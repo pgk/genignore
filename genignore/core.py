@@ -15,10 +15,9 @@ from .helpers import isatty
 from . import updaters
 
 
-MASTER_ARCHIVE = "https://github.com/github/gitignore/archive/master.zip"
-GENIGNORE_CACHE = ".genignore_cache"
-LATEST_ZIP = "latest.zip"
-
+from .config import MASTER_ARCHIVE
+from .config import GENIGNORE_CACHE
+from .config import LATEST_ZIP
 
 
 class _CacheResolver(object):
@@ -100,6 +99,11 @@ class GenController(object):
         templates = self.resolver.init_repo_templates()
         print_list(templates.keys(), title='Available Templates:')
         return 0
+
+    def sources(self, args):
+        from .controllers import SourcesController
+        controller = SourcesController()
+        controller(args)
 
     def __call__(self, args):
         action = args.action
