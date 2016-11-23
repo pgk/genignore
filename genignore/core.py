@@ -179,24 +179,26 @@ def build_gitignore(resolver, templates_for_merging, out=None, add_to_existing=F
                 if e in templates_for_merging:
                     del templates_for_merging[e]
 
-    if len(templates_for_merging):
-        print_notice("building .gitignore for (%s)" % ", ".join(templates_for_merging.keys()))
-
-        with ZipFile(fname, 'r') as zipfile:
-            for name, template in templates_for_merging.iteritems():
-                with zipfile.open(template, 'rU') as tmp:
-                    file_content.append(make_separator(name))
-                    file_content.append(tmp.read())
-                    file_content.append(make_separator(name, "/"))
-
-        file_content.append(os.linesep)
-        gitignore = os.linesep.join(file_content)
-        if out is sys.stdout:
-            out.write(gitignore)
-        else:
-            with open(gitignore_path, 'w') as f:
-                f.write(gitignore)
-                print_success("Done writing .gitignore templates on file %s" % gitignore_path)
-    else:
+    if len(templates_for_merging) == 0:
         print_notice("no templates remaining after filtering. Exiting")
+        return 1
 
+    print_notice("building .gitignore for (%s)" % ", ".join(templates_for_merging.keys()))
+
+    with ZipFile(fname, 'r') as zipfile:
+        for name, template in six.iteritems(templates_for_merging):
+            with zipfile.open(template, 'rU') as tmp:
+                file_content.append(make_separator(name))
+                file_content.append(tmp.read())
+                file_content.append(make_separator(name, "/"))
+
+    file_content.append(os.linesep)
+    gitignore = os.linesep.join(file_content)
+
+    if out is sys.stdout:
+        out.write(gitignore)
+        return 0
+
+    with open(gitignore_path, 'w') as f:
+        f.write(gitignore)
+        print_success("Done writing .gitignore templates on file %s" % gitignore_path)
