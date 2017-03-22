@@ -23,5 +23,10 @@ clean: rmpyc
 rmpyc:
 	find . -name "*.pyc" -exec rm -rf {} \;
 
+release:
+	# sdist
+	rm -rf dist
+	$(ENV)/bin/python setup.py sdist
+	twine upload dist/*
 
-.PHONY: deps deps3
+.PHONY: deps deps3 release
