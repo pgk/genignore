@@ -1,20 +1,27 @@
 PYTHON?=python2.7
+PYTHON_THREE?=`which python3`
 ENV?=env
 VIRTUALENV?=virtualenv
 
-deps: clean
+deps: clean venv develop
+
+deps3: clean venv3 develop
+
+venv:
 	virtualenv --python=$(PYTHON) --no-site-packages $(ENV)
+
+venv3:
+	$(PYTHON_THREE) -m venv $(ENV)
+
+develop:
 	$(ENV)/bin/python setup.py develop
 
-deps3: clean
-		pyvenv $(ENV)
-		$(ENV)/bin/python setup.py develop
-
-clean:
+clean: rmpyc
 	rm -rf $(ENV)
 	mkdir -p $(ENV)
 
 rmpyc:
 	find . -name "*.pyc" -exec rm -rf {} \;
 
-.PHONY: deps
+
+.PHONY: deps deps3

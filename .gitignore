@@ -1,7 +1,7 @@
 
 .venv
 test_ignore
-
+.eggs
 
 # <genignore python>
 
@@ -179,5 +179,3 @@ crashlytics-build.properties
 
 
 # </genignore jetbrains>
-
-
