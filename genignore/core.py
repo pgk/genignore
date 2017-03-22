@@ -187,7 +187,7 @@ def build_gitignore(resolver, templates_for_merging, out=None, add_to_existing=F
 
     with ZipFile(fname, 'r') as zipfile:
         for name, template in six.iteritems(templates_for_merging):
-            with zipfile.open(template, 'rU') as tmp:
+            with zipfile.open(template, 'r') as tmp:
                 file_content.append(make_separator(name))
                 tmp_content = tmp.read()
                 if six.PY3:

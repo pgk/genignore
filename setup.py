@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name = "genignore",
-    version = "0.5.3",
+    version = "0.5.4",
     url="https://pypi.python.org/pypi/genignore",
     packages = find_packages(),
     author="Panos Kountanis",
@@ -26,7 +26,7 @@ setup(
         'clint>=0.3.7',
         'six>=1.8.0'
     ],
-    setup_requires= [
+    setup_requires = [
         'nose>=1.0',
         'mock'
     ]
