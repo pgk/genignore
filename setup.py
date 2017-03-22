@@ -28,6 +28,7 @@ setup(
     ],
     setup_requires = [
         'nose>=1.0',
-        'mock'
+        'mock',
+        'twine'
     ]
 )
