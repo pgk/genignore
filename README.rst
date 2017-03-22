@@ -2,15 +2,15 @@
 genignore
 ===========
 
-A command line tool that generates ``.gitignore`` files using github's collection 
+Command line tool that generates ``.gitignore`` files using github's collection
 of `gitignore templates <https://github.com/github/gitignore>`_.
 
 Features
 ========
 
-* sync with remote functionality
+* syncs with https://github.com/github/gitignore
 * You can specify a custom output file other that ``.gitignore``
-* Can keep and combine the contents of any existing .gitignore file
+* Keeps and combine the contents of existing .gitignore
 
 
 Install
@@ -19,23 +19,22 @@ Install
 ::
 
     pip install --upgrade genignore
-  
+
 Usage
 =========
 
-* To sync the templates with github, use ``genignore sync``
-* To generate a .gitignore for python, osx and linux, use ``genignore gen python osx linux``
-* To generate a .gitignore for python, osx and linux and save it as ``.foo``, use ``genignore gen python osx linux --out=.foo``
-* To add into an existing ignore, use ``genignore gen --add jetbrains``
-* You can also ``genignore gen python osx linux > .foo``
-* To list available templates, run ``genignore list``
-* Get help with ``genignore --help``
+* Get help: ``genignore --help``
+* Grab the latest https://github.com/github/gitignore master: ``genignore sync``
+* List available templates: ``genignore list``
+* Generate .gitignore for python, osx and linux: ``genignore gen python osx linux``
+* Generate .gitignore for python, osx and linux, save it as ``.foo``: ``genignore gen python osx linux --out=.foo``
+* To add into an existing .gitignore, use ``genignore gen --add jetbrains``
+* You can also redirect stdout ``genignore gen python osx linux > .foo``
 
-  
 Bugs/Features
 =============
 
-Feel free to open a github issue `here <https://github.com/pgk/genignore/issues>`_.
+Open a github issue `here <https://github.com/pgk/genignore/issues>`_.
 
 
 Contributors
