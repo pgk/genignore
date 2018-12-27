@@ -9,8 +9,8 @@ Features
 ========
 
 * syncs with https://github.com/github/gitignore
-* You can specify a custom output file other that ``.gitignore``
-* Keeps and combine the contents of existing .gitignore
+* You can specify a custom output file other than ``.gitignore``
+* Merges contents of existing `.gitignore`
 
 
 Install
