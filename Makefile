@@ -1,4 +1,4 @@
-PYTHON?=python2.7
+PYTHON?=python3
 PYTHON_THREE?=`which python3`
 ENV?=env
 VIRTUALENV?=virtualenv
@@ -8,9 +8,6 @@ deps: clean venv develop
 deps3: clean venv3 develop
 
 venv:
-	virtualenv --python=$(PYTHON) --no-site-packages $(ENV)
-
-venv3:
 	$(PYTHON_THREE) -m venv $(ENV)
 
 develop:
@@ -23,7 +20,7 @@ clean: rmpyc
 rmpyc:
 	find . -name "*.pyc" -exec rm -rf {} \;
 
-release:
+release: venv
 	# sdist
 	rm -rf dist
 	$(ENV)/bin/python setup.py sdist
