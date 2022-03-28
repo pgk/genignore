@@ -15,7 +15,7 @@ from .helpers import isatty
 from . import updaters
 
 
-MASTER_ARCHIVE = "https://github.com/github/gitignore/archive/main.zip"
+MASTER_ARCHIVE = "https://codeload.github.com/github/gitignore/zip/refs/heads/main"
 GENIGNORE_CACHE = ".genignore_cache"
 LATEST_ZIP = "latest.zip"
 
